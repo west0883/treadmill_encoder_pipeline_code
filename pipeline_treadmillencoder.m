@@ -33,8 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-parameters.mice_all(1).days=mice_all(1).days(1);
-%parameters.mice_all(1).days(1).stacks=1;
+%parameters.mice_all(1).days = mice_all(1).days(2:5); 
 
 % **********************************************************************8
 % Input Directories
@@ -131,12 +130,12 @@ parameters.periods_full_transition={'full_onset';
 parameters.full_transition_extra_time=1;                  
 parameters.full_transition_extra_hz=parameters.full_transition_extra_time*parameters.wheel_Hz;                                          
              
-%% Extract data and save as .mat file. 
+%% Extract data and save as .mat file.  (Can take awhile).
 % From .log if PUTTY was used, from .txt files if it wasn't. 
 parameters.input_data_name={'ArduinoOutput*.log' }; 
 extractEncoderData(parameters);
 
-%% Clean and format data. 
+%% Clean and format data. (Can take awhile).
 
 % For now, change the input data name--> might do something different later
 parameters.input_data_name={'trial', 'stack number', '.mat'}; 
@@ -144,7 +143,7 @@ parameters.input_data_name={'trial', 'stack number', '.mat'};
 % Run code.
 formatEncoderData(parameters);
 
-%% Calculate smoothed velocity.
+%% Calculate smoothed and corrected velocity.
 % Also removes the skip period here.
 % For now, change the input data name--> might do something different later
 parameters.input_data_name={'trial', 'stack number', '.mat'}; 
@@ -157,6 +156,9 @@ saveVelocities(parameters);
 parameters.input_data_name={'vel', 'stack number', '.mat'}; 
 
 encoderFindBehaviorPeriods(parameters);
+
+%% Segment velocities.
+segmentVelocities(parameters); 
 
 %% Group velocities per behavior period per mouse.
 groupVelocities(parameters);

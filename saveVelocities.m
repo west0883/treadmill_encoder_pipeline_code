@@ -12,6 +12,7 @@ function [] = saveVelocities(parameters)
     fps = parameters.fps; 
     channelNumber = parameters.channelNumber;
     skip = parameters.skip;
+    frames = parameters.frames;
     
     % Establish base input directory
     dir_in_base=[dir_exper 'behavior\formatted encoder data\'];
@@ -43,7 +44,7 @@ function [] = saveVelocities(parameters)
             mkdir(dir_out); 
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, dir_in, parameters);
+            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)
@@ -65,8 +66,19 @@ function [] = saveVelocities(parameters)
                 % velocity (cm/s). 
                 % Multiply by 1000 (the wheel_Hz)because the dt (sampling rate is 1000 Hz
                 % so not multiplying by 1000 would give you cm / ms. 
-                vel=diff(smooth)*wheel_Hz;  
+                vel.uncorrected=diff(smooth)*wheel_Hz;  
                
+                % Also correct the trace 
+                % correct the velocity
+                correcting_timeseries=(0:(frames-1)).*wheel_Hz./fps; 
+                correcting_timeseries(1)=1; % don't let it be a 0
+
+                if correcting_timeseries(end)>size(vel.uncorrected,1)
+                    ind=find((correcting_timeseries-size(vel.uncorrected,1))<=0,1, 'last'); % find the closest values of correcting_timeseries that matches the size of vel (without going over) and stop correcting_timeseries at that point
+                    correcting_timeseries=correcting_timeseries(1:ind);  
+                end 
+                vel.corrected=[vel.uncorrected(correcting_timeseries)]; 
+                
                 % Save velocity trace. 
                 save([dir_out 'vel' stack_number '.mat'], 'vel'); 
                 

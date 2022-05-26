@@ -63,7 +63,7 @@ function [] = encoderFindBehaviorPeriods(parameters)
             mkdir(dir_out);
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, dir_in, parameters);
+            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)
@@ -74,6 +74,9 @@ function [] = encoderFindBehaviorPeriods(parameters)
                 
                 % Load the stack. 
                 load([dir_in filename])
+                
+                % Change the variable name for ease.
+                vel = vel.uncorrected; 
                 
                 % Start getting behaviors.
                 
@@ -562,7 +565,7 @@ function [] = encoderFindBehaviorPeriods(parameters)
                                     rest_onesecond=[rest_onesecond; rest_onesecond_hold];
                                     walk_onesecond=[walk_onesecond; walk_onesecond_hold];
 
-                                    disp('potential onset');
+                                    % disp('potential onset');
                                 end
                             end
 
@@ -577,13 +580,13 @@ function [] = encoderFindBehaviorPeriods(parameters)
 
                                     % find segments of rest and walk before and
                                     % after and concatenate into list of segments
-                                    rest_onesecond=[(postwalk_periods(row_postwalk,2)+1),postwalk_periods(row_postwalk,2)+full_transition_extra_hz]; 
-                                    walk_onesecond=[(stopwalk_periods(row_stopwalk,1)-full_transition_extra_hz),stopwalk_periods(row_stopwalk,1)-1]; 
+                                    rest_onesecond_hold=[(postwalk_periods(row_postwalk,2)+1),postwalk_periods(row_postwalk,2)+full_transition_extra_hz]; 
+                                    walk_onesecond_hold=[(stopwalk_periods(row_stopwalk,1)-full_transition_extra_hz),stopwalk_periods(row_stopwalk,1)-1]; 
 
                                     rest_onesecond=[rest_onesecond; rest_onesecond_hold];
                                     walk_onesecond=[walk_onesecond; walk_onesecond_hold];
 
-                                    disp('potential offset');
+                                    % disp('potential offset');
                                  end 
                             end 
                    end
@@ -613,7 +616,7 @@ function [] = encoderFindBehaviorPeriods(parameters)
                    if isempty(rows_todelete)==0
                       rest_onesecond(rows_todelete,:)=[];
                       walk_onesecond(rows_todelete,:)=[];
-                      disp('violation');
+                      % disp('violation');
                    end
 
                    % Make sure the rest_onesecond and walk_onesecond always fall in
@@ -635,7 +638,7 @@ function [] = encoderFindBehaviorPeriods(parameters)
                        % if either are violated, mark the row for deletion
                        if any([rest_violation walk_violation])==1
                             rows_todelete=[rows_todelete; rowi];
-                            disp('violation');
+                            % disp('violation');
                        end
                    end
 
@@ -645,15 +648,15 @@ function [] = encoderFindBehaviorPeriods(parameters)
                       walk_onesecond(rows_todelete,:)=[];
                    end
 
-                   % calculate full range
+                   % Get the full range
                    if isempty(rest_onesecond)==1   %only need to check 1, the other should also be empty
                       periods_holding=[]; 
                    else 
                        switch period
                            case 'full_onset'
-                               periods_holding=rest_onesecond(:,1):walk_onesecond(:,2); 
+                               periods_holding = [rest_onesecond(:,1), walk_onesecond(:,2)]; 
                            case 'full_offset'
-                               periods_holding=walk_onesecond(:,1):rest_onesecond(:,2); 
+                               periods_holding = [walk_onesecond(:,1), rest_onesecond(:,2)]; 
                        end
                    end
                    % Rename with period-specific name
@@ -721,20 +724,8 @@ function [] = encoderFindBehaviorPeriods(parameters)
              end
 
             %% Save all the corrected data 
+            save([dir_out 'behavior_periods_' stack_number], '*_periods_correct'); 
 
-             save([dir_out 'behavior_periods_' stack_number], 'rest_periods_correct', ...
-                                                            'walk_periods_correct', ...
-                                                            'prewalk_periods_correct', ...
-                                                            'startwalk_periods_correct', ...
-                                                            'stopwalk_periods_correct', ...
-                                                            'postwalk_periods_correct',...
-                                                            'rest_long_periods_correct',...
-                                                            'walk_long_periods_correct'); 
-
-              % save the full transition data, if user said "go"
-              if full_transition_flag==1
-                  save([dir_out 'full_transitions_' stack_number], 'full_onset_periods', 'full_offset_periods');
-              end  
                 
             end
         end

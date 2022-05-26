@@ -34,12 +34,12 @@ function [] = extractEncoderData(parameters)
             day=mice_all(mousei).days(dayi).name; 
             
             % Create data input directory and cleaner output directory. 
-            dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], false);
+            dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], [], false);
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, dir_in, parameters);
+            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
             
             % If not using PUTTY
             if ~putty_flag 

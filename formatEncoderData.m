@@ -42,7 +42,7 @@ function [] = formatEncoderData(parameters)
             mkdir(dir_out);
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, dir_in, parameters);
+            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)
@@ -50,6 +50,8 @@ function [] = formatEncoderData(parameters)
                 % Get the stack number and filename for the stack.
                 stack_number = stackList.numberList(stacki, :);
                 filename = stackList.filenames(stacki, :);
+                
+                disp(['mouse ' mouse ', day '  day ', stack ' stack_number]);
                 
                 % Load the stack. 
                 load([dir_in filename])
