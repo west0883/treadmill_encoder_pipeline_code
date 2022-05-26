@@ -7,6 +7,11 @@ function [] = saveVelocities(parameters)
     dir_exper = parameters.dir_exper; 
     k = parameters.k; 
     digitNumber = parameters.digitNumber; 
+    skip = parameters.skip; 
+    wheel_Hz = parameters.wheel_Hz;
+    fps = parameters.fps; 
+    channelNumber = parameters.channelNumber;
+    skip = parameters.skip;
     
     % Establish base input directory
     dir_in_base=[dir_exper 'behavior\formatted encoder data\'];
@@ -15,6 +20,12 @@ function [] = saveVelocities(parameters)
    
     % Tell user where data is being saved
     disp(['Data saved in ' dir_out_base]); 
+    
+    % Convert the skip from brain imaging frames to wheel sampling time
+    % points. Divide by brain sampling rate to get seconds to skip,
+    % multiply by wheel sampling to get to number of wheel timepoints to
+    % skip. Extra parentheses written for clarity.
+    skip_converted = (skip / (fps * channelNumber)) * wheel_Hz; 
     
     % For each mouse 
     for mousei=1:size(mice_all,2)
@@ -42,16 +53,19 @@ function [] = saveVelocities(parameters)
                 filename = stackList.filenames(stacki, :);
                 
                 % Load the stack. 
-                load([dir_in filename])
-            
+                load([dir_in filename]);
+                
+                % Remove the skip period, if any.
+                trial.position = trial.position(skip_converted + 1 : end); 
+                
                 % Smooth the postition data of the wheel 
                 smooth=movmean(trial.position,k); 
              
                 % Take the derivative of the smoothed position data to get
                 % velocity (cm/s). 
-                % Multiply by 1000 because the dt (sampling rate is 1000 Hz
+                % Multiply by 1000 (the wheel_Hz)because the dt (sampling rate is 1000 Hz
                 % so not multiplying by 1000 would give you cm / ms. 
-                vel=diff(smooth)*1000;  
+                vel=diff(smooth)*wheel_Hz;  
                
                 % Save velocity trace. 
                 save([dir_out 'vel' stack_number '.mat'], 'vel'); 

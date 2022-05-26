@@ -61,11 +61,14 @@ parameters.wheel_Hz = 1000;
 % second.
 parameters.fps= 20; 
 
+% Number of channels from brain data (need this to calculate correct
+% "skip" time length).
+parameters.channelNumber = 2;
+
 % Number of frames you recorded from brain and want to keep (don't make chunks longer than this)  
 parameters.frames=6000; 
 
-
-% Number of initial frames brain frames to skip, allows for brightness/image
+% Number of initial brain frames to skip, allows for brightness/image
 % stabilization of camera. Need this to know how much to skip in the
 % behavior.
 parameters.skip = 1200; 
@@ -142,7 +145,7 @@ parameters.input_data_name={'trial', 'stack number', '.mat'};
 formatEncoderData(parameters);
 
 %% Calculate smoothed velocity.
-
+% Also removes the skip period here.
 % For now, change the input data name--> might do something different later
 parameters.input_data_name={'trial', 'stack number', '.mat'}; 
 
@@ -155,8 +158,11 @@ parameters.input_data_name={'vel', 'stack number', '.mat'};
 
 encoderFindBehaviorPeriods(parameters);
 
-%% Group velocities per behavior period per mouse together.
-
+%% Group velocities per behavior period per mouse.
+groupVelocities(parameters);
 
 %% Calculate, save, and plot average velocity per behavior period per mouse. 
+% velocity_save_bybehaviorperiod.m  (might consolodate this into wheel_data_analysis.m) 
+
+%% Calculate, save, and plot average velocity per behavior period across mice
 % velocity_save_bybehaviorperiod.m  (might consolodate this into wheel_data_analysis.m) 
