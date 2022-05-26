@@ -50,6 +50,8 @@ function [] = extractEncoderData(parameters)
                     % Get the stack number and filename for the stack.
                     stack_number = stackList.numberList(stacki, :);
                     filename = stackList.filenames(stacki, :);
+                    
+                    % Need to import and convert these, too. 
 
                 end
             
