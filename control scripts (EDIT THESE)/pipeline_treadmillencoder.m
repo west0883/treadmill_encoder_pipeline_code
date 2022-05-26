@@ -33,7 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-parameters.mice_all = parameters.mice_all(5:end);
+parameters.mice_all = parameters.mice_all(2:end);
 %parameters.mice_all(1).days = parameters.mice_all(1).days(6:end);
 % parameters.mice_all(1).days(1).spontaneous = {'01', '02', '03', '04', '05'};
 
@@ -320,6 +320,12 @@ parameters.loop_list.things_to_save.concatenated_data.filename= {'segmented_velo
 parameters.loop_list.things_to_save.concatenated_data.variable= {'segmented_velocity'}; 
 parameters.loop_list.things_to_save.concatenated_data.level = 'period';
 
+parameters.loop_list.things_to_save.concatenated_origin.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_origin.filename= {'segmented_velocity_concatenation_orgin', 'period', '.mat'};
+parameters.loop_list.things_to_save.concatenated_origin.variable= {'concatenation_origin'}; 
+parameters.loop_list.things_to_save.concatenated_origin.level = 'period';
+
+
 RunAnalysis({@ConcatenateData}, parameters); 
 
 %% Average velocities within mice.
@@ -380,7 +386,7 @@ parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'peri
 parameters.loop_list.things_to_load.data.variable= {'segmented_velocity'}; 
 parameters.loop_list.things_to_load.data.level = 'period';
 
-parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'regression analysis\walk velocity\spontaneous\velocity vectors\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.average.filename= {'velocity_vector.mat'};
 parameters.loop_list.things_to_save.average.variable= {'velocity_vector'}; 
 parameters.loop_list.things_to_save.average.level = 'period';
@@ -389,6 +395,11 @@ parameters.loop_list.things_to_rename = {{'data_reshaped', 'data'}};
 RunAnalysis({@ReshapeData, @AverageData, }, parameters);
 
 %% Plot the average walk velocity calculated above
-figure; histogram(average_velocity);
-xlabel('average velocity (cm/s)'); ylabel('number of instances');
-title('spontaneous walk average velocity, m1087');
+for mousei = 1:size(mice_all,2)
+    mouse = mice_all(mousei).name;
+    load([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\velocity_vector.mat']);
+    figure; histogram(velocity_vector, 50);
+    xlabel('average velocity (cm/s)'); ylabel('number of instances');
+    title(['spontaneous walk average velocity, ' mouse]);
+    savefig([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\spontaneous_vevlocities.fig']);
+end
