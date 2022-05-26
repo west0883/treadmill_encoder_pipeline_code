@@ -84,7 +84,7 @@ for dayi= 1:size(days_all,1)        % for each day
          name=list(stacki).name(1:7);
          stacknum=name(6:7); 
      
-         eval(['wheel_correct=[' name '(:,2)./24000*2*pi*8.5];']);  
+         %eval(['wheel_correct=[' name '(:,2)./24000*2*pi*8.5];']);  
          smooth=movmean(wheel_correct,k); % Smooth the wheel 
          vel=diff(smooth).*1000;  %time data is in first column of wheel, position data in second
      
