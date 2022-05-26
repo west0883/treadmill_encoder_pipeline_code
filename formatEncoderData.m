@@ -40,10 +40,14 @@ function [] = formatEncoderData(parameters)
             
             % Establish output directory.
             dir_out = [dir_out_base mouse '\' day '\']; 
-            mkdir(dir_out);
-            
+           
             % Get the stack list
             [stackList]=GetStackList(mousei, dayi, parameters);
+            
+            % Only make an output folder if there's data.
+            if ~isempty(stackList)
+                mkdir(dir_out);
+            end 
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)
