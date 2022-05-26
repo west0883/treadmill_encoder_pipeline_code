@@ -8,7 +8,7 @@ function [] = averageVelocitiesAcrossMice(parameters)
     periods_full_transition =parameters.periods_full_transition;                 
     
     % Specify dimension to concatenate and average across
-    parameters.averageDim = 2;
+    parameters.concatDim = 2;
     
     % Establish input directory for velocity
     parameters.dir_input_base = [dir_exper 'behavior\all behavior instances per mouse\'];
