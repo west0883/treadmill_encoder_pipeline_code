@@ -39,6 +39,18 @@ function [] = extractEncoderData(parameters)
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
+            % If user wants to use spontaneous stacks field, use those
+            % instead. 
+            if parameters.use_spontaneous 
+               
+                if isfield(parameters.mice_all(mousei).days(dayi), 'spontaneous')
+                    parameters.mice_all(mousei).days(dayi).stacks = [parameters.mice_all(mousei).days(dayi).spontaneous];
+            
+                % If no spontaneous field, make stacks NaN so you skip over this day.   
+                else 
+                    parameters.mice_all(mousei).days(dayi).stacks = [NaN}
+            end
+         
             % Get the stack list
             [stackList]=GetStackList(mousei, dayi, parameters);
             
