@@ -237,7 +237,9 @@ for dayi= 1:size(days_all,1)        % for each day
      walk_to_rest=intersect(walk_real_stops, rest_real_starts);  % moments that mouse goes from walking to rest 
 
     
-   %% find clean periods of prewalk, startwalk, stopwalk, and postwalk 
+   
+     
+     %% find clean periods of prewalk, startwalk, stopwalk, and postwalk 
     % Find the transition periods and remove them from the relevant long
     % periods.Calculations need to be done individually, since all the transition states are defined differently.
    
