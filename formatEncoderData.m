@@ -45,7 +45,7 @@ function [] = formatEncoderData(parameters)
             [stackList]=GetStackList(mousei, dayi, parameters);
             
             % Only make an output folder if there's data.
-            if ~isempty(stackList)
+            if ~isempty(stackList.numberList)
                 mkdir(dir_out);
             end 
             
