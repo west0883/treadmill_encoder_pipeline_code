@@ -21,8 +21,8 @@ function [parameters] = formatEncoderData(parameters)
     r = size(timedata, 1);
     
     % Will hold wheel data that's been up-sampled 
-    wheel_new.time=[]; 
-    wheel_new.position=[]; 
+    wheel_new.time= cell(r, 1); 
+    wheel_new.position = cell(r,1); 
     
     % For each entry, skipping the first 2,
     for i=3:r
@@ -68,21 +68,23 @@ function [parameters] = formatEncoderData(parameters)
            end
            
            % Add data to list of data
-           wheel_new.time=[wheel_new.time; tvect'];
-           wheel_new.position =[wheel_new.position; pvect'];
+           wheel_new.time{i} = tvect';
+           wheel_new.position{i} = pvect';
           
         else
             % If no large gap in time, 
             
             % Just take next entry and add it to the list of
             % data
-            wheel_new.time = [wheel_new.time; timedata(i)];
-            wheel_new.position = [wheel_new.position; positiondata(i)]; 
+            wheel_new.time{i} = timedata(i);
+            wheel_new.position{i} = positiondata(i); 
         
         end
         
     end
-    
+    % Concatenate new time and positions.
+    wheel_new.time = vertcat(wheel_new.time{:});
+    wheel_new.position = vertcat(wheel_new.position{:});
     % Find and get rid of repeating time points (often happens at the beginning of the series)
     [~,ia,~] = unique(wheel_new.time);
     wheel_new1.time = wheel_new.time(ia);  
