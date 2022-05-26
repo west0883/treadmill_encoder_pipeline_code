@@ -13,6 +13,12 @@ experiment_name=['Random Motorized Treadmill\'];
 dir_base='Y:\Sarah\Analysis\Experiments\';
 dir_exper=[dir_base experiment_name '\']; 
 
+% Load the motorized treadmill behavior table for getting correct final
+% indices for index field.
+load([dir_exper 'periods_nametable.mat'], 'periods');
+periods_motorized = periods; 
+clear periods;
+
 % Frames per second of fluorescence recording. 
 fps = 20; 
 
@@ -42,7 +48,7 @@ for namei = 1:numel(period_names)
     periods(namei).condition = period_names{namei};
 
     % Put in "index" (will be number of motorized periods + namei)
-    periods(namei).index = 188 + namei; 
+    periods(namei).index = size(periods_motorized,1) + namei; 
 
     % Put in all NaN values.
     periods(namei).speed = 'NaN';
