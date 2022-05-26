@@ -39,7 +39,7 @@ function [] = extractEncoderData(parameters)
             mkdir(dir_out); 
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
+            [stackList]=GetStackList(mousei, dayi, parameters);
             
             % If not using PUTTY
             if ~putty_flag 
