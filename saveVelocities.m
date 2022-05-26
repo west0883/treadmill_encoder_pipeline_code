@@ -40,11 +40,12 @@ function [] = saveVelocities(parameters)
             
             % Create data input directory and cleaner output directory. 
             dir_in = [dir_in_base mouse '\' day '\'];
+            parameters.dir_in = dir_in;
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
             % Get the stack list
-            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in, input_data_name, digitNumber);
+            [stackList]=GetStackList(mousei, dayi, parameters);
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)

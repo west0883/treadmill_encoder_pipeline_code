@@ -33,7 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-%parameters.mice_all(1).days = mice_all(1).days(2:5); 
+parameters.mice_all(1).days = mice_all(1).days(6:9); 
 
 % **********************************************************************8
 % Input Directories

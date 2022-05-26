@@ -39,11 +39,12 @@ function [] = SegmentTimeseriesData(periods_all, parameters)
             % Create data input directory and cleaner output directory. 
             dir_in_segment = [dir_in_segment_base mouse '\' day '\'];
             dir_in_data = [dir_in_data_base mouse '\' day '\'];
+            parameters.dir_in = dir_in_data;
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
             % Get the velocities stack list
-            [stackList]=GetStackList(mousei, dayi, mice_all, dir_in_data, input_data_name, digitNumber);
+            [stackList]=GetStackList(mousei, dayi, parameters);
             
             % For each stack, 
             for stacki= 1:size(stackList.filenames,1)
