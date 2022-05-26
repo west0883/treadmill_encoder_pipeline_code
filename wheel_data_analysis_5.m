@@ -240,21 +240,19 @@ for dayi= 1:size(days_all,1)        % for each day
    %% find clean periods of prewalk, startwalk, stopwalk, and postwalk 
     % Find the transition periods and remove them from the relevant long
     % periods.Calculations need to be done individually, since all the transition states are defined differently.
-    
-   for periodi=1:size(periods_transition,1) % for each trasition period 
-       period=periods_transition{periodi};
+   
        
        % ***Find the "unclean periods"--> defined by distance from rest-walk transitions. ***
-       switch period
-           case 'prewalk'
-               unclean_periods=[rest_to_walk-time_window_hz , rest_to_walk];  
-           case 'startwalk'
-               unclean_periods=[rest_to_walk, rest_to_walk+time_window_hz]; 
-           case 'stopwalk'
-               unclean_periods=[walk_to_rest-time_window_hz , walk_to_rest];
-           case 'postwalk'    
-               unclean_periods=[walk_to_rest, walk_to_rest+time_window_hz]; 
-       end
+%        switch period
+%            case 'prewalk'
+%                unclean_periods=[rest_to_walk-time_window_hz , rest_to_walk];  
+%            case 'startwalk'
+%                unclean_periods=[rest_to_walk, rest_to_walk+time_window_hz]; 
+%            case 'stopwalk'
+%                unclean_periods=[walk_to_rest-time_window_hz , walk_to_rest];
+%            case 'postwalk'    
+%                unclean_periods=[walk_to_rest, walk_to_rest+time_window_hz]; 
+%        end
        % *** Now, make sure the relevant rest or walk periods actually extend far enough in each direction. ***
        
        % set up variable to hold rows (instances) for removal
@@ -268,91 +266,100 @@ for dayi= 1:size(days_all,1)        % for each day
        % within-walk periods first so you only take the outside-walk
        % periods that immediately precede/follow real walk periods at least
        % 3 seconds in length. 
-       switch period
-           case {'prewalk', 'starwalk'} 
-                for rowi=1:size(rest_to_walk,1) 
-                    % do the relevant calculations 
-                    switch period
-                        case 'startwalk'
-                            % find the walk period that begins at the same time the startwalk period does
-                            ind1=find(walk_periods(:,1)==unclean_periods(rowi,1)); 
-                            
-                            % if the walk period doesn't extend far foward enough in time, mark the instance for removal 
-                            if walk_periods(ind1,2)<unclean_periods(rowi,2) 
-                                removal_flag=1; 
-                            else % if the walk period IS long enough
-                                % keep the startwalk, truncate the walk period so it doesn't include the startwalk
-                                walk_periods(ind1,1)=unclean_periods(i,2); 
-                            end
-                            
-                        case 'prewalk'
-                            % Start working on this in terms of startwalk 
-                            % find the rest period that ends at the same time the prewalk period does
-                             ind1=find(rest_periods(:,2)==unclean_periods(rowi,2)); 
-                            
-                             % if the rest period doesn't extend far back enough in time, mark the instance for removal 
-                             if rest_periods(ind1,1)>unclean_periods(rowi,1)
-                                 removal_flag=1;
-                             else  % if the rest period IS long enough
-                                 % keep the prewalk, truncate the rest period so it doesn't include the prewalk
-                                 rest_periods(ind1,2)=unclean_periods(rowi,1);   
-                             end 
-                        
-                    end
-                    % if row/instance was marked for removal, add row to the list for removal 
-                    if removal_flag==1
-                       rows_todelete=[rows_todelete; rowi];
-                    end
+      
+       % Begin calculations for startwalk and prewalk
+        for rowi=1:size(rest_to_walk,1) 
+            % do the relevant calculations 
+            
+            % startwalk calculations
+               
+            % find the walk period that begins at the same time the startwalk period does
+            ind1=find(walk_periods(:,1)==unclean_periods(rowi,1)); 
+
+            % if the walk period doesn't extend far foward enough in time, mark the instance for removal 
+            if walk_periods(ind1,2)<unclean_periods(rowi,2) 
+                removal_flag=1; 
+            else % if the walk period IS long enough
+                % keep the startwalk, truncate the walk period so it doesn't include the startwalk
+                walk_periods(ind1,1)=unclean_periods(i,2); 
+            end
+
+            % prewalk calculations
+            % Start working on this in terms of startwalk--> 
+            % ***First, remove any periods that don't have a corresponding
+            % startwalk***
+            % find the rest period that ends at the same time the prewalk period does
+             ind1=find(rest_periods(:,2)==unclean_periods(rowi,2)); 
+
+             % if the rest period doesn't extend far back enough in time, mark the instance for removal 
+             if rest_periods(ind1,1)>unclean_periods(rowi,1)
+                 removal_flag=1;
+             else  % if the rest period IS long enough
+                 % keep the prewalk, truncate the rest period so it doesn't include the prewalk
+                 rest_periods(ind1,2)=unclean_periods(rowi,1);   
+             end 
+
+            % CHANGE THIS FOR EACH OF THE TWO PERIODS if row/instance was marked for removal, add row to the list for removal 
+            if removal_flag==1
+               rows_todelete=[rows_todelete; rowi];
+            end
+        end        
+           
+        % Begin calculations for stopwalk and postwalk
+        for rowi=1:size(walk_to_rest,1)
+
+            % stopwalk calculations
+                % find the walk period that ends at the same time the stopwalk period does
+                ind1=find(walk_periods(:,2)==unclean_periods(rowi,2)); 
+
+                % if the walk period doesn't extend far back enough in time, mark the instance for removal
+                if walk_periods(ind1,1)>unclean_periods(rowi,1) 
+                    removal_flag=1; 
+                else  % if the rest period IS long enough
+                    % keep the stopwalk, truncate the rest period so it doesn't include the stopwalk
+                    walk_periods(ind1,2)=unclean_periods(rowi,1);  
                 end
-           case {'stopwalk', 'postwalk'} 
-                for rowi=1:size(walk_to_rest,1)
-                    % do the relevant calculations 
-                    switch period
-                        case 'stopwalk'
-                            % find the walk period that ends at the same time the stopwalk period does
-                            ind1=find(walk_periods(:,2)==unclean_periods(rowi,2)); 
-                            
-                            % if the walk period doesn't extend far back enough in time, mark the instance for removal
-                            if walk_periods(ind1,1)>unclean_periods(rowi,1) 
-                                removal_flag=1; 
-                            else  % if the rest period IS long enough
-                                % keep the stopwalk, truncate the rest period so it doesn't include the stopwalk
-                                walk_periods(ind1,2)=unclean_periods(rowi,1);  
-                            end
-                            
-                        case 'postwalk'
-                            % find the rest period that begins at the same time the postwalk period does
-                            ind1=find(rest_periods(:,1)==unclean_periods(rowi,1));
-                            
-                            % if the rest period doesn't extend far foward enough in time, mark the instance for removal
-                            if rest_periods(ind1,2)<unclean_periods(rowi,2) 
-                               removal_flag=1; 
-                            else % if the walk period IS long enough  
-                                % keep the postwalk, truncate the rest period so it doesn't include the postwalk
-                                rest_periods(ind1,1)=unclean_periods(rowi,2);
-                            end 
-                    end
-                    % if row/instance was marked for removal, add row to the list for removal 
-                    if removal_flag==1
-                       rows_todelete=[rows_todelete; rowi];
-                    end
+
+            % postwalk calculations
+                % ***First, remove any periods that don't have a corresponding
+                % stopwalk **
+                % find the rest period that begins at the same time the postwalk period does
+                ind1=find(rest_periods(:,1)==unclean_periods(rowi,1));
+
+                % if the rest period doesn't extend far foward enough in time, mark the instance for removal
+                if rest_periods(ind1,2)<unclean_periods(rowi,2) 
+                   removal_flag=1; 
+                else % if the walk period IS long enough  
+                    % keep the postwalk, truncate the rest period so it doesn't include the postwalk
+                    rest_periods(ind1,1)=unclean_periods(rowi,2);
                 end 
-       end
+
+            % CHANGE THIS FOR EACH OF THE TWO PERIODS if row/instance was marked for removal, add row to the list for removal 
+            if removal_flag==1
+               rows_todelete=[rows_todelete; rowi];
+            end
+        end 
        
-       % start cleaning the "unclean" periods
-        periods_holding=unclean_periods; 
-       % don't let them fall above length of vel or below index 1
-       [rows1, columns]=find(periods_holding>size(vel,1)); 
-       [rows2, columns]=find(periods_holding<1); 
-       rows_todelete=[rows_todelete; rows1; rows2];
-       
-       % remove the "unclean" intances
-       periods_holding(rows_todelete,:)=[];  
-       
-       % give variables a period-specific name
-       eval([period '_periods=periods_holding;']);
-   end
-  
+% Can cycle through the periods here       
+% % %         for periodi=1:size(periods_transition,1)
+%%%             period=periods_transition{periodi};
+% % %        
+% % %        % Start cleaning the "unclean" periods
+% % %        
+%%%    % Convert to generic name
+%%%%   eval(['periods_holding=' period _unclean_periods;']);  
+% % %        % don't let them fall above length of vel or below index 1
+% % %        [rows1, columns]=find(periods_holding>size(vel,1)); 
+% % %        [rows2, columns]=find(periods_holding<1); 
+% % %        rows_todelete=[rows_todelete; rows1; rows2];
+% % %        
+% % %        % remove the "unclean" intances
+% % %        periods_holding(rows_todelete,:)=[];  
+% % %        
+% % %        % Return variables to a period-specific name
+% % %        eval([period '_periods=periods_holding;']);
+% % %    
+% % %   end
  
  %% find clean instances of walk, rest (at least 3 seconds)  
  % Now that you've removed the transition periods, find instances of rest 
