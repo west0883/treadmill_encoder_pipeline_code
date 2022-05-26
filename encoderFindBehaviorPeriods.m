@@ -12,8 +12,6 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     disp(message);
 
     % Give parameters their original names
- 
-    wheel_Hz = parameters.wheel_Hz;
     
     fps = parameters.fps; 
     frames = parameters.frames;
@@ -23,12 +21,12 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     periods_transition = parameters.periods_transition;
     periods_long_searchorder = parameters.periods_long_searchorder;
     
-    time_window_hz = parameters.time_window_hz;
-    time_window_hz_continued = parameters.time_window_hz_continued;
+    time_window_frames = parameters.time_window_frames;
+    time_window_frames_continued = parameters.time_window_frames_continued;
     full_transition_flag = parameters.full_transition_flag;  
     periods_full_transition =parameters.periods_full_transition;                 
                     
-    full_transition_extra_hz = parameters.full_transition_extra_hz;
+    full_transition_extra_frames = parameters.full_transition_extra_frames;
     
     % Make yet another cell to hold names of not-broken-down long periods
     % for cycling through later. 
@@ -38,7 +36,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     end
  
     % Change the variable name for ease.
-    vel = parameters.velocity.uncorrected;
+    vel = parameters.velocity.corrected;
     
     % Start getting behaviors.
     
@@ -198,16 +196,16 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
    % ***Find the "unclean periods"--> defined by distance from rest-walk transitions. ***
 
    % Prewalk
-   prewalk_unclean_periods=[rest_to_walk-time_window_hz , rest_to_walk];  
+   prewalk_unclean_periods=[rest_to_walk-time_window_frames + 1, rest_to_walk];  
 
    % Startwalk
-   startwalk_unclean_periods=[rest_to_walk, rest_to_walk+time_window_hz]; 
+   startwalk_unclean_periods=[rest_to_walk + 1, rest_to_walk+time_window_frames]; 
 
    % Stopwalk
-   stopwalk_unclean_periods=[walk_to_rest-time_window_hz , walk_to_rest];
+   stopwalk_unclean_periods=[walk_to_rest-time_window_frames + 1 , walk_to_rest];
 
    % Postwalk
-   postwalk_unclean_periods=[walk_to_rest, walk_to_rest+time_window_hz]; 
+   postwalk_unclean_periods=[walk_to_rest + 1, walk_to_rest+time_window_frames]; 
 
    % *** Now, make sure the relevant rest or walk periods actually extend far enough in each direction. *** 
 
@@ -346,7 +344,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
          periods_lengths=periods_holding(:,2)-periods_holding(:,1); 
 
          % find if they're shoreter than the desired length
-         ind1=find(periods_lengths<time_window_hz_continued); 
+         ind1=find(periods_lengths<time_window_frames_continued); 
 
          % remove the too-short instances
          periods_holding(ind1,:)=[];
@@ -375,16 +373,16 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
            for instancei=1:size(periods_holding,1) 
                % find the length of the instance
                period_length=periods_holding(instancei,2)-periods_holding(instancei,1)+1;
-               if period_length > time_window_hz_continued   % if the walk chunk is greater than 3 seconds 
+               if period_length > time_window_frames_continued   % if the walk chunk is greater than 3 seconds 
                   % find how many 3-second chunks the instance can make 
-                  quotient=floor(period_length/time_window_hz_continued);
+                  quotient=floor(period_length/time_window_frames_continued);
 
                   % make the first chunk start where the instance starts
                   new_chunk_start=periods_holding(instancei, 1); 
 
                   % make the first chunk end 1 time window length after the
                   % start of the instance
-                  new_chunk_end=periods_holding(instancei,1)+time_window_hz_continued-1; 
+                  new_chunk_end=periods_holding(instancei,1)+time_window_frames_continued-1; 
 
                   % concatenate the first chunk into list of brokendown
                   % chunks for the stack
@@ -395,10 +393,10 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                       for quotienti=1:(quotient-1) % don't use the last one because you're cycling through the *start* of each chunk
 
                           % find the start of the given chunk
-                          new_chunk_start=periods_holding(instancei,1)+time_window_hz_continued*quotienti;
+                          new_chunk_start=periods_holding(instancei,1)+time_window_frames_continued*quotienti;
 
                           % find the end of the given chunk
-                          new_chunk_end=periods_holding(instancei,1)+time_window_hz_continued*quotienti+time_window_hz_continued-1;
+                          new_chunk_end=periods_holding(instancei,1)+time_window_frames_continued*quotienti+time_window_frames_continued-1;
 
                           % concatenate the chunk into your list of 
                           brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
@@ -466,19 +464,19 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     
                 case 'prewalk'
                     % can fidget in the last second
-                    violation_flag=any(vel(periods_holding(rowi,1):(periods_holding(rowi,2)-20))>periods_long_threshold(1,2));
+                    violation_flag=any(vel(periods_holding(rowi,1):(periods_holding(rowi,2)- fps))>periods_long_threshold(1,2));
     
                 case 'startwalk'
                     % after the first second, the mouse must always be over the walking threshold
-                    violation_flag=any(vel((periods_holding(rowi,1)+wheel_Hz):periods_holding(rowi,2))<periods_long_threshold(2,1)); 
+                    violation_flag=any(vel((periods_holding(rowi,1)+fps):periods_holding(rowi,2))<periods_long_threshold(2,1)); 
     
                 case 'stopwalk'
                     % must stay above the walking threshold until the last second
-                    violation_flag=any(vel(periods_holding(rowi,1):(periods_holding(rowi,2)-wheel_Hz))<periods_long_threshold(2,1));
+                    violation_flag=any(vel(periods_holding(rowi,1):(periods_holding(rowi,2)-fps))<periods_long_threshold(2,1));
     
                 case 'postwalk'
                     % allow wheel to swing backwards some (below bottom rest threshold), but don't let it go over top rest threshold 
-                    violation_flag=any(vel((periods_holding(rowi,1)+wheel_Hz):periods_holding(rowi,2))>periods_long_threshold(1,2));
+                    violation_flag=any(vel((periods_holding(rowi,1)+fps):periods_holding(rowi,2))>periods_long_threshold(1,2));
             end
     
             % mark if row (instance) should be deleted
@@ -515,14 +513,14 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                     for row_startwalk=1:size(startwalk_periods,1) 
 
                         % see if there's a full segment of prewalk before the onset
-                        row_prewalk=find(prewalk_periods(:,2)==startwalk_periods(row_startwalk,1));  
+                        row_prewalk=find(prewalk_periods(:,2)==startwalk_periods(row_startwalk,1) - 1);  
 
                         if isempty(row_prewalk)==0   % if there IS a segment of prewalk
 
                             % find segments of rest and walk before and
                             % after and concatenate into list of segments
-                            rest_onesecond_hold=[(prewalk_periods(row_prewalk,1)-full_transition_extra_hz),prewalk_periods(row_prewalk,1)-1]; 
-                            walk_onesecond_hold=[(startwalk_periods(row_startwalk,2)+1),startwalk_periods(row_startwalk,2)+full_transition_extra_hz]; 
+                            rest_onesecond_hold=[(prewalk_periods(row_prewalk,1)-full_transition_extra_frames),prewalk_periods(row_prewalk,1)-1]; 
+                            walk_onesecond_hold=[(startwalk_periods(row_startwalk,2)+1),startwalk_periods(row_startwalk,2)+full_transition_extra_frames]; 
 
                             rest_onesecond=[rest_onesecond; rest_onesecond_hold];
                             walk_onesecond=[walk_onesecond; walk_onesecond_hold];
@@ -536,14 +534,14 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                     for row_stopwalk=1:size(stopwalk_periods,1)
 
                         % see if there's a full segment of postwalk after the offset
-                        row_postwalk=find(postwalk_periods(:,1)==stopwalk_periods(row_stopwalk,2));
+                        row_postwalk=find(postwalk_periods(:,1)==stopwalk_periods(row_stopwalk,2) + 1);
 
                          if isempty(row_postwalk)==0   % if there IS a segment of postwalk
 
                             % find segments of rest and walk before and
                             % after and concatenate into list of segments
-                            rest_onesecond_hold=[(postwalk_periods(row_postwalk,2)+1),postwalk_periods(row_postwalk,2)+full_transition_extra_hz]; 
-                            walk_onesecond_hold=[(stopwalk_periods(row_stopwalk,1)-full_transition_extra_hz),stopwalk_periods(row_stopwalk,1)-1]; 
+                            rest_onesecond_hold=[(postwalk_periods(row_postwalk,2)+1),postwalk_periods(row_postwalk,2)+full_transition_extra_frames]; 
+                            walk_onesecond_hold=[(stopwalk_periods(row_stopwalk,1)-full_transition_extra_frames),stopwalk_periods(row_stopwalk,1)-1]; 
 
                             rest_onesecond=[rest_onesecond; rest_onesecond_hold];
                             walk_onesecond=[walk_onesecond; walk_onesecond_hold];
@@ -650,17 +648,13 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
          period=periods_large{periodi};
 
          % convert variable names to something generic to cycle through
-         eval(['periods_holding=' period '_periods;']); 
+         eval(['periods_correct=' period '_periods;']); 
 
          % convert time ranges to frames
-         periods_correct=round(periods_holding.*fps./wheel_Hz); 
+       %%%%  periods_correct=round(periods_holding.*fps./wheel_Hz); 
 
          % correct any problems introduced by the rounding   
          if ~isempty(periods_correct) % only if periods aren't empty
-
-             % Add 1 to the start of the window (so it doesn't overlap with
-             % previous/end up one frame too long).
-
 
              % Don't let the first frame be called "0." The indexing has to 
              % start at 1. This is still a valid intance though, so change the
