@@ -34,9 +34,10 @@ parameters.mice_all = mice_all;
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
 parameters.mice_all = parameters.mice_all(1);
+%parameters.mice_all(1).days = parameters.mice_all(1).days(13);
 
 % Use only stacks from a "spontaneous" field of mice_all?
-parameters.use_spontaneous_only = true;
+%parameters.use_spontaneous_only = true;
 
 % **********************************************************************8
 % Input Directories
@@ -47,8 +48,6 @@ parameters.use_spontaneous_only = true;
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
-parameters.dir_dataset_name={'Y:\Sarah\Data\', parameters.experiment_name, '\', 'day', '\', 'mouse number', '\Arduino output\'};
-parameters.input_data_name={'ArduinoOutput*.log' }; 
 
 % Give the number of digits that should be included in each stack number.
 parameters.digitNumber=2; 
@@ -110,11 +109,17 @@ parameters.periods_long_searchorder={'first', 'last';    % rest start, rest stop
 % ***Analysis info ****
 % Number of time points to smooth the vel by 
 parameters.k=100; 
-% How the animal needs to be at rest or walking for it to count, in seconds
+
+% Amount of time to count as a transition.
 parameters.time_window_seconds=3; 
 
-parameters.time_window_frames=parameters.time_window_seconds*parameters.fps; % how long the animal needs to be at rest or walking, in frames
-parameters.time_window_hz=parameters.time_window_seconds*parameters.wheel_Hz; % how long the animal needs to be at rest or walking, in wheel sampled time points
+% How long the animal needs to be at rest or walking for it to count, in seconds
+parameters.time_window_seconds_continued = 1;
+
+parameters.time_window_frames = parameters.time_window_seconds*parameters.fps; % how long the animal needs to be at rest or walking, in frames
+parameters.time_window_hz = parameters.time_window_seconds*parameters.wheel_Hz; % how long the animal needs to be at rest or walking, in wheel sampled time points
+parameters.time_window_frames_continued =  parameters.time_window_seconds_continued*parameters.fps;
+parameters.time_window_hz_continued = parameters.time_window_seconds_continued *parameters.wheel_Hz;
 
 % Do you want full transitions? (These are rare)
 % "true" if you want "full onsets" and "full offsets" calculated; false if
@@ -125,8 +130,9 @@ parameters.periods_full_transition={'full_onset';
 
 % In seconds, the amount of time into the continued rest and walk that should be included in the full transition                         
 parameters.full_transition_extra_time=1;                  
-parameters.full_transition_extra_hz=parameters.full_transition_extra_time*parameters.wheel_Hz;                                          
-             
+parameters.full_transition_extra_frames=parameters.full_transition_extra_time*parameters.fps;                                          
+
+periods = [parameters.periods_long; parameters.periods_transition; parameters.periods_full_transition];
 %% Extract data and save as .mat file.  (Can take awhile).
 % From .log if PUTTY was used, from .txt files if it wasn't. 
 
@@ -153,6 +159,7 @@ parameters.loop_list.things_to_load.log.variable= {};
 parameters.loop_list.things_to_load.log.level = 'log';
 parameters.loop_list.things_to_load.log.load_function = @importlog;
 
+% Output
 parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\spontaneous\extracted encoder data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
@@ -162,36 +169,186 @@ RunAnalysis({@extractEncoderData}, parameters);
 
 %% Clean and format data. (Can take awhile).
 
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'trial', 'stack number', '.mat'}; 
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\spontaneous\extracted encoder data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
+parameters.loop_list.things_to_load.trial.level = 'stack';
+
+% Output.
+parameters.loop_list.things_to_save.trial_formatted.dir = {[parameters.dir_exper 'behavior\spontaneous\formatted encoder data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.trial_formatted.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_save.trial_formatted.variable= {'trial'}; 
+parameters.loop_list.things_to_save.trial_formatted.level = 'stack';
 
 % Run code.
-formatEncoderData(parameters);
+RunAnalysis({@formatEncoderData}, parameters);
 
 %% Calculate smoothed and corrected velocity.
-% Also removes the skip period here.
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'trial', 'stack number', '.mat'}; 
+% For entire stacks. Also removes the skip period here.
 
-saveVelocities(parameters); 
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\spontaneous\formatted encoder data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
+parameters.loop_list.things_to_load.trial.level = 'stack';
+
+% Output.
+parameters.loop_list.things_to_save.velocity.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.velocity.filename= {'velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.velocity.variable= {'velocity'}; 
+parameters.loop_list.things_to_save.velocity.level = 'stack';
+
+RunAnalysis({@saveVelocities}, parameters); 
 
 %% Pull out locomotion periods.
 
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'vel', 'stack number', '.mat'}; 
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
 
-encoderFindBehaviorPeriods(parameters);
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input.
+parameters.loop_list.things_to_load.velocity.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.velocity.filename= {'velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.velocity.variable= {'velocity'}; 
+parameters.loop_list.things_to_load.velocity.level = 'stack';
+
+parameters.loop_list.things_to_save.behavior_periods.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.behavior_periods.filename= {'behavior_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.behavior_periods.variable= {'behavior_periods'}; 
+parameters.loop_list.things_to_save.behavior_periods.level = 'stack';
+
+RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
 
 %% Segment velocities.
-segmentVelocities(parameters); 
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator';
+               'period', {'loop_variables.periods{:}'}, 'period_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+parameters.segmentDim = 1;
+parameters.concatDim  = 2;
+
+% Input.
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.timeseries.filename= {'velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.timeseries.variable= {'velocity.corrected'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'stack';
+
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename= {'behavior_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable= {'behavior_periods.', 'period'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'stack';
+
+% Output
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity segmented by behavior\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename= {'segmented_velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable= {'segmented_velocity.', 'period'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'stack';
+
+RunAnalysis({@SegmentTimeseriesData}, parameters); 
 
 %% Concatenate velocities per behavior period per mouse. 
-% Also finds the average and std.
-concatenateVelocities(parameters);
 
-%% Concatenate velocities per behavior periods across mice.
-% Also finds the average and std.
-averageVelocitiesAcrossMice(parameters);
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods{:}'}, 'period_iterator';
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator' };
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+parameters.concatDim  = 2;
+
+% Input
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity segmented by behavior\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_velocity.', 'period'}; 
+parameters.loop_list.things_to_load.data.level = 'stack';
+
+% Output
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.filename= {'segmented_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_save.concatenated_data.variable= {'segmented_velocity'}; 
+parameters.loop_list.things_to_save.concatenated_data.level = 'period';
+
+RunAnalysis({@ConcatenateData}, parameters); 
+
+%% Average velocities within mice.
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods{:}'}, 'period_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+parameters.averageDim  = 2;
+
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_velocity'}; 
+parameters.loop_list.things_to_load.data.level = 'period';
+
+parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.average.filename= {'average_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_save.average.variable= {'average_velocity'}; 
+parameters.loop_list.things_to_save.average.level = 'period';
+
+RunAnalysis({@AverageData}, parameters);
 
 %% Plot average velocities. 
 
