@@ -46,6 +46,10 @@ function [] = segmentVelocities(parameters)
     % Establish concatenation dimension.
     parameters.concatDim = 2;
     
+    % Say that you want the time segmentation to be set to a pre-defined
+    % length
+    parameters.use_set_window = true;
+    
     % Tell user where data is being saved
     disp(['Data saved in '  parameters.dir_out_base]); 
     
