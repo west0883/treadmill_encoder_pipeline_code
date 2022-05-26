@@ -119,7 +119,7 @@ function [] = SegmentTimeseriesData(periods_all, parameters)
                 end 
                 
                 % Get the right names for saving per stack. 
-                variable_searching_name = CreateFileStrings(output_variable,[], [], [], period, true);
+                variable_searching_name = CreateFileStrings(output_variable,[], [], [], [], true);
                 saving_filename = CreateFileStrings(output_filename,[], [], stack_number, [], false);
                 
                 % Save per stack. 
