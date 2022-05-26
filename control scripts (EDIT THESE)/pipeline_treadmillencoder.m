@@ -33,7 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-parameters.mice_all = parameters.mice_all(2:end);
+%parameters.mice_all = parameters.mice_all();
 %parameters.mice_all(1).days = parameters.mice_all(1).days(6:end);
 % parameters.mice_all(1).days(1).spontaneous = {'01', '02', '03', '04', '05'};
 
@@ -398,7 +398,7 @@ RunAnalysis({@ReshapeData, @AverageData, }, parameters);
 for mousei = 1:size(mice_all,2)
     mouse = mice_all(mousei).name;
     load([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\velocity_vector.mat']);
-    figure; histogram(velocity_vector, 50);
+    figure; histogram(velocity_vector, 20);
     xlabel('average velocity (cm/s)'); ylabel('number of instances');
     title(['spontaneous walk average velocity, ' mouse]);
     savefig([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\spontaneous_vevlocities.fig']);
