@@ -1,11 +1,11 @@
-% groupVelocities.m
+% concatenateVelocities.m
 % Sarah West
 % 10/12/21
 
 % Takes 3- second behavior periods per mouse and saves them all in the same
 % matrix. 
 
-function [] = groupVelocities(parameters)
+function [] = concatenateVelocities(parameters)
     
     % Give parameters their original names
     mice_all = parameters.mice_all;

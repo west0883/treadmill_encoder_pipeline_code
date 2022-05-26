@@ -160,11 +160,13 @@ encoderFindBehaviorPeriods(parameters);
 %% Segment velocities.
 segmentVelocities(parameters); 
 
-%% Group velocities per behavior period per mouse.
-groupVelocities(parameters);
+%% Concatenate velocities per behavior period per mouse. 
+% Also finds the average and std.
+concatenateVelocities(parameters);
 
-%% Calculate, save, and plot average velocity per behavior period per mouse. 
-% velocity_save_bybehaviorperiod.m  (might consolodate this into wheel_data_analysis.m) 
+%% Concatenate velocities per behavior periods across mice.
+% Also finds the average and std.
+averageVelocitiesAcrossMice(parameters);
 
-%% Calculate, save, and plot average velocity per behavior period across mice
-% velocity_save_bybehaviorperiod.m  (might consolodate this into wheel_data_analysis.m) 
+%% Plot average velocities. 
+

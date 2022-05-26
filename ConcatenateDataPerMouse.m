@@ -11,7 +11,7 @@
 
 % The "input variable name" should have the period specified in it.
 
-function [concatenated_data] = ConcatenateDataPerMouse(periods_all, parameters)
+function [] = ConcatenateDataPerMouse(periods_all, parameters)
     
     % Give parameters easier names. 
     dir_input_base = parameters.dir_input_base;
@@ -90,13 +90,24 @@ function [concatenated_data] = ConcatenateDataPerMouse(periods_all, parameters)
          for periodi = 1:size(periods_all, 1) 
              period = periods_all{periodi};
         
-             % Get specific name of variable
+             % Make the name generic again for averaging & finding standard
+             % deviation.
+             eval(['concatenated_data = ' period '_concatenated_data;']); 
+               
+             % Take mean and std.
+             holder.mean = nanmean(concatenated_data, concatDim); 
+             holder.std = std(concatenated_data, [], concatDim, 'omitnan');
+             
+             % Put data into same structure.
+             holder.all_instances =concatenated_data;
+             
+             % Get specific name of variable for saving.
              variable_name_output = CreateFileStrings(output_variable_name,[], [], [], period, false);
              
              % Change matrix name to output-specific name.
-             eval([variable_name_output ' = ' period '_concatenated_data;']); 
+             eval([variable_name_output ' = holder;']); 
              
-             % Get specific name of file.
+             % Get specific name of file for saving.
              filename_output = CreateFileStrings(output_file_name,[], [], [], period, false);
              
              % Save
