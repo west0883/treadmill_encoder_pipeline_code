@@ -20,6 +20,13 @@ function [parameters] = extractEncoderData(parameters)
     stack_number = str2num(CreateStrings({'stack'}, parameters.keywords, parameters.values));
 
     % Run convertEnc2Cm.m function
-    parameters.trial = convertEnc2Cm(parameters.log, 'True', parameters.wheel_radius, stack_number);
+    trial = convertEnc2Cm(parameters.log, 'True', parameters.wheel_radius, stack_number);
+    
+    % Tell Run Analysis not to save if empty 
+    if isempty(trial)
+        parameters.dont_save = true;
+    end 
 
+    parameters.trial = trial; 
+    
 end 
