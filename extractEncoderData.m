@@ -39,17 +39,7 @@ function [] = extractEncoderData(parameters)
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
-            % If user wants to use spontaneous stacks field, use those
-            % instead. 
-            if parameters.use_spontaneous 
-               
-                if isfield(parameters.mice_all(mousei).days(dayi), 'spontaneous')
-                    parameters.mice_all(mousei).days(dayi).stacks = [parameters.mice_all(mousei).days(dayi).spontaneous];
-            
-                % If no spontaneous field, make stacks NaN so you skip over this day.   
-                else 
-                    parameters.mice_all(mousei).days(dayi).stacks = [NaN];
-            end
+            disp(['mouse ' mouse ' day ' day]);
          
             % Get the stack list
             [stackList]=GetStackList(mousei, dayi, parameters);
@@ -73,26 +63,39 @@ function [] = extractEncoderData(parameters)
                 
                 % Find the PUTTY log file name. 
                 filelist = dir([dir_in input_data_name{1}]);
-                logFile = convertCharsToStrings([dir_in filelist.name]);
-                % Run convertEnc2Cm.m function
-                [converted] = convertEnc2Cm(logFile, 'True', wheel_radius);
                 
-                % Separate into separate trial files to match later
-                % processing
-                
-                for stacki = 1:size(converted,2)
+                % If there is a file, do the rest of the extraction,
+                % skip otherwise.
+                if isempty(filelist)
+                   disp(['No spontaneous log for mouse ' mouse ' day ' day]);
+                else 
                     
-                    trial.stack_number = sprintf(['%0' num2str(digitNumber) 'd'], converted(stacki).trialNum); 
-                    trial.trialTime = converted(stacki).trialTime; 
-                    trial.positions = converted(stacki).positions; 
-                    trial.velocities = converted(stacki).velocities;
-                    trial.totalDist = converted(stacki).totalDist; 
+                    % For each matching log name,
+                    for logi = 1:size(filelist,1)
                     
-                    % Save each trial. 
-                    save([dir_out 'trial' trial.stack_number '.mat'], 'trial'); 
-                    
-                end     
-                
+                        disp(['Checking log ' num2str(logi)]);
+
+                        logFile = convertCharsToStrings([parameters.dir_in filelist(logi).name]);
+                        % Run convertEnc2Cm.m function
+                        [converted] = convertEnc2Cm(logFile, 'True', wheel_radius);
+
+                        % Separate into separate trial files to match later
+                        % processing
+
+                        for stacki = 1:size(converted,2)
+
+                            trial.stack_number = sprintf(['%0' num2str(digitNumber) 'd'], converted(stacki).trialNum); 
+                            trial.trialTime = converted(stacki).trialTime; 
+                            trial.positions = converted(stacki).positions; 
+                            trial.velocities = converted(stacki).velocities;
+                            trial.totalDist = converted(stacki).totalDist; 
+
+                            % Save each trial. 
+                            save([dir_out 'trial' trial.stack_number '.mat'], 'trial'); 
+
+                        end 
+                    end
+                end
             end
         end
     end 
