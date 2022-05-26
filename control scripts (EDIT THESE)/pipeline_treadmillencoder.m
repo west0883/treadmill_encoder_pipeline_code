@@ -33,10 +33,10 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-%parameters.mice_all(1).days = mice_all(1).days(6:9); 
+parameters.mice_all(1).days = mice_all(1).days(9:12); 
 
 % Use only stacks from a "spontaneous" field of mice_all?
-parameters.use_spontaneous = true;
+parameters.use_spontaneous_only = true;
 
 % **********************************************************************8
 % Input Directories
@@ -47,7 +47,7 @@ parameters.use_spontaneous = true;
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
-parameters.dir_dataset_name={'Y:\Sarah\Data\', parameters.experiment_name, '\', 'day', '\', 'mouse number', '\'};
+parameters.dir_dataset_name={'Y:\Sarah\Data\', parameters.experiment_name, '\', 'day', '\', 'mouse number', '\Arduino output\'};
 parameters.input_data_name={'ArduinoOutput*.log' }; 
 
 % Give the number of digits that should be included in each stack number.
@@ -129,7 +129,6 @@ parameters.full_transition_extra_hz=parameters.full_transition_extra_time*parame
              
 %% Extract data and save as .mat file.  (Can take awhile).
 % From .log if PUTTY was used, from .txt files if it wasn't. 
-parameters.input_data_name={'ArduinoOutput*.log' }; 
 extractEncoderData(parameters);
 
 %% Clean and format data. (Can take awhile).
