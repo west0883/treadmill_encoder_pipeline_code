@@ -12,7 +12,7 @@ clear all;
 % Output Directories
 
 % Create the experiment name. This is used to name the output folder. 
-parameters.experiment_name='Inhibitory Neurons';
+parameters.experiment_name='Random Motorized Treadmill';
 
 % Output directory name bases
 parameters.dir_base='Y:\Sarah\Analysis\Experiments\';
@@ -35,6 +35,9 @@ parameters.mice_all = mice_all;
 
 %parameters.mice_all(1).days = mice_all(1).days(6:9); 
 
+% Use only stacks from a "spontaneous" field of mice_all?
+parameters.use_spontaneous = true;
+
 % **********************************************************************8
 % Input Directories
 
@@ -44,7 +47,7 @@ parameters.mice_all = mice_all;
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
-parameters.dir_dataset_name={'Y:\Sarah\Data\', parameters.experiment_name, '\', 'day', '\','m', 'mouse number', '\'};
+parameters.dir_dataset_name={'Y:\Sarah\Data\', parameters.experiment_name, '\', 'day', '\', 'mouse number', '\'};
 parameters.input_data_name={'ArduinoOutput*.log' }; 
 
 % Give the number of digits that should be included in each stack number.
