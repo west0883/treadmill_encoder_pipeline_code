@@ -25,6 +25,7 @@ function [parameters] = extractEncoderData(parameters)
     % Tell Run Analysis not to save if empty 
     if isempty(trial)
         parameters.dont_save = true;
+        MessageToUser('Could not find ', parameters);
     end 
 
     parameters.trial = trial; 
