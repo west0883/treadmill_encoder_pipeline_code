@@ -8,6 +8,9 @@ function [parameters] = saveVelocities(parameters)
     skip = parameters.skip;
     frames = parameters.frames;
     trial = parameters.trial;
+
+    % Message to user.
+    MessageToUser('Saving velocity for ', parameters);
     
     % Convert the skip from brain imaging frames to wheel sampling time
     % points. Divide by brain sampling rate to get seconds to skip,
