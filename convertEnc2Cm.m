@@ -54,6 +54,8 @@ function [converted] = convertEnc2Cm(data,velocityFlag, radius, stack_number)
             
         end
 
+    else 
+        converted = [];
     end
 end
 % toc
