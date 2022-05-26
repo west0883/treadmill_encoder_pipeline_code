@@ -77,12 +77,6 @@ parameters.putty_flag = true;
 
 % Radius of wheel, in cm.
 parameters.wheel_radius = 8.5;
-
-% List the threshold speeds of each long period (lower, upper) in cm/s;
-% Values that fall between the 0.05 and 0.25 are probably twitches or
-% fidgets. 
-parameters.periods_long_threshold=[ -0.25 0.05;  % rest low, rest high. We don't want to count walking fast backwards.
-                         0.25 Inf];   % walk low, walk high
                      
 % List periods that are long/will need to be cut into smaller sections.
 % Rest and walk are the 2 primary behaviors detected by the encoder, and
@@ -106,7 +100,7 @@ parameters.periods_long_threshold=[ -0.25 0.05;  % rest low, rest high. We don't
                      
 % List the search orders for finding the earliest or most recent velocity
 % of 0 to define the start and stop of rest or locomotion. This makes more
-% sense when you look at the code that uses it (encoderFindBehaviorPeriods) 
+% sense when you look at the code that uses it (encoderFindBehaviorPeriods). Probably won't need to edit. 
 parameters.periods_long_searchorder={'first', 'last';    % rest start, rest stop
                           'last', 'first'};   % walk start, walk stop
                       
