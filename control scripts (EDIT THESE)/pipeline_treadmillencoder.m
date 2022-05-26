@@ -33,9 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-%  parameters.mice_all = parameters.mice_all(2:3);
-%  parameters.mice_all(1).days = parameters.mice_all(1).days(9:10); 
-%parameters.mice_all(1).days = parameters.mice_all(1).days([6:7, 11:12]); 
+parameters.mice_all = parameters.mice_all(1);
 
 % Use only stacks from a "spontaneous" field of mice_all?
 parameters.use_spontaneous_only = true;
