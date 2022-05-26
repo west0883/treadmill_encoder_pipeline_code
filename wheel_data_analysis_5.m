@@ -29,9 +29,9 @@ periods_long={'rest';
 % List periods that are transition periods that are taken from pieces of
 % rest and walk. The "continued rest" and "continued walk" is the rest and
 % walk that is left after the transition periods are removed. 
-periods_transition={'prewalk'; 
-               'startwalk';
-               'stopwalk';
+periods_transition={'startwalk';     % Run the within-walk periods first,so you can make sure there's a real "walking" period after the prewalk, not just a large fidget
+                'prewalk'; 
+                'stopwalk';
                'postwalk'}; 
                              
 % List the threshold speeds of each long period (lower, upper) in cm/s;
@@ -264,24 +264,15 @@ for dayi= 1:size(days_all,1)        % for each day
        % removed (flag is O)
        removal_flag=0; 
        
-       % cycle through each instance of the relevant transition
+       % cycle through each instance of the relevant transition. Run the
+       % within-walk periods first so you only take the outside-walk
+       % periods that immediately precede/follow real walk periods at least
+       % 3 seconds in length. 
        switch period
            case {'prewalk', 'starwalk'} 
                 for rowi=1:size(rest_to_walk,1) 
                     % do the relevant calculations 
                     switch period
-                        case 'prewalk'
-                            % find the rest period that ends at the same time the prewalk period does
-                             ind1=find(rest_periods(:,2)==unclean_periods(rowi,2)); 
-                            
-                             % if the rest period doesn't extend far back enough in time, mark the instance for removal 
-                             if rest_periods(ind1,1)>unclean_periods(rowi,1)
-                                 removal_flag=1;
-                             else  % if the rest period IS long enough
-                                 % keep the prewalk, truncate the rest period so it doesn't include the prewalk
-                                 rest_periods(ind1,2)=unclean_periods(rowi,1);   
-                             end 
-       
                         case 'startwalk'
                             % find the walk period that begins at the same time the startwalk period does
                             ind1=find(walk_periods(:,1)==unclean_periods(rowi,1)); 
@@ -293,6 +284,20 @@ for dayi= 1:size(days_all,1)        % for each day
                                 % keep the startwalk, truncate the walk period so it doesn't include the startwalk
                                 walk_periods(ind1,1)=unclean_periods(i,2); 
                             end
+                            
+                        case 'prewalk'
+                            % Start working on this in terms of startwalk 
+                            % find the rest period that ends at the same time the prewalk period does
+                             ind1=find(rest_periods(:,2)==unclean_periods(rowi,2)); 
+                            
+                             % if the rest period doesn't extend far back enough in time, mark the instance for removal 
+                             if rest_periods(ind1,1)>unclean_periods(rowi,1)
+                                 removal_flag=1;
+                             else  % if the rest period IS long enough
+                                 % keep the prewalk, truncate the rest period so it doesn't include the prewalk
+                                 rest_periods(ind1,2)=unclean_periods(rowi,1);   
+                             end 
+                        
                     end
                     % if row/instance was marked for removal, add row to the list for removal 
                     if removal_flag==1
