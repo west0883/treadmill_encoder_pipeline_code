@@ -37,7 +37,6 @@ function [] = extractEncoderData(parameters)
             dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], [], false);
             parameters.dir_in = dir_in;
             dir_out=[dir_out_base mouse '\' day '\']; 
-            mkdir(dir_out); 
             
             disp(['mouse ' mouse ' day ' day]);
          
@@ -69,7 +68,8 @@ function [] = extractEncoderData(parameters)
                 if isempty(filelist)
                    disp(['No spontaneous log for mouse ' mouse ' day ' day]);
                 else 
-                    
+                    mkdir(dir_out); 
+                     
                     % For each matching log name,
                     for logi = 1:size(filelist,1)
                     
