@@ -7,4 +7,4 @@ This code calls on code created by other programmers, including importlog.m . Cr
 This respository is a work in progress. For questions, problems, or concerns, please email Sarah West at [west0883@umn.edu](west0883@umn.edu).
 
 Please cite use of this code in any resulting projects or publications as: <br>
-West, SL. (2021). MATLAB disk treadmill velocity porcessing code. Accessed [date accessed]. https://github.com/west0883/treadmill_encoder_pipeline_code
+West SL, Aronson JD. (2021). MATLAB disk treadmill velocity porcessing code. Accessed [date accessed]. https://github.com/west0883/treadmill_encoder_pipeline_code
