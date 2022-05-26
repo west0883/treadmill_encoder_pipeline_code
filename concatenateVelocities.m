@@ -42,14 +42,14 @@ function [] = concatenateVelocities(parameters)
     
     % Put all periods into a single cell array. 
     % If user asked for full onsets/full offsets, add those to the save list, too. 
-    if full_transition_flag
-        periods_all = [periods_long; periods_transition; periods_full_transition];
-
-    else
-        periods_all = [periods_long; periods_transition]; 
-    end
+     if isfield(parameters, 'full_transition_flag')  
+        if parameters.full_transition_flag
+            parameters.periods_all = [parameters.periods_long; parameters.periods_transition; parameters.periods_full_transition];
+        else
+            parameters.periods_all = [parameters.periods_long; parameters.periods_transition]; 
+        end
+    end 
     
-    ConcatenateDataPerMouse(periods_all, parameters);
-    
+    ConcatenateDataPerMouse(parameters.periods_all, parameters);
 
 end 
