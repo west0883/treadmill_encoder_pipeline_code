@@ -48,7 +48,6 @@ for namei = 1:numel(period_names)
     periods(namei).speed = 'NaN';
     periods(namei).accel = 'NaN';
     periods(namei).previous_speed = 'NaN';
-    periods(namei).previous_accel = 'NaN';
     periods(namei).two_speeds_ago = 'NaN';
 
 end
