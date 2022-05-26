@@ -48,7 +48,7 @@ function [] = extractEncoderData(parameters)
             
                 % If no spontaneous field, make stacks NaN so you skip over this day.   
                 else 
-                    parameters.mice_all(mousei).days(dayi).stacks = [NaN}
+                    parameters.mice_all(mousei).days(dayi).stacks = [NaN];
             end
          
             % Get the stack list
