@@ -40,7 +40,7 @@ function [] = encoderFindBehaviorPeriods(parameters)
     dir_in_base = [dir_exper 'behavior\velocity trace per stack\'];
     
     % Establish base output directory
-    dir_out_base=[dir_exper 'behavior\segmented behavior periods\'];
+    dir_out_base=[dir_exper 'behavior\encoder segmented behavior periods\'];
     
     % Tell user where data is being saved
     disp(['Data saved in ' dir_out_base]); 
@@ -61,10 +61,14 @@ function [] = encoderFindBehaviorPeriods(parameters)
             
             % Establish output directory.
             dir_out = [dir_out_base mouse '\' day '\']; 
-            mkdir(dir_out);
             
             % Get the stack list
             [stackList]=GetStackList(mousei, dayi, parameters);
+            
+            % Only make an output folder if there's data.
+            if ~isempty(stackList.numberList)
+                mkdir(dir_out);
+            end 
             
             % For each stack, 
             for stacki=1:size(stackList.filenames,1)

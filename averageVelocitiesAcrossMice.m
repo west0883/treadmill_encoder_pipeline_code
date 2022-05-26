@@ -11,7 +11,7 @@ function [] = averageVelocitiesAcrossMice(parameters)
     parameters.concatDim = 2;
     
     % Establish input directory for velocity
-    parameters.dir_input_base = [dir_exper 'behavior\all behavior instances per mouse\'];
+    parameters.dir_input_base = [dir_exper 'behavior\encoder all behavior instances per mouse\'];
     
     % Input data name for velocity
     parameters.input_file_name= {'period name', '_all_velocities.mat'}; 
@@ -20,7 +20,7 @@ function [] = averageVelocitiesAcrossMice(parameters)
     parameters.input_variable_name = {'all_velocities'}; 
   
     % Establish base output directory
-    parameters.dir_out_base=[dir_exper 'behavior\average velocity across mice\'];
+    parameters.dir_out_base=[dir_exper 'behavior\encoder average velocity across mice\'];
     
      % Output file name. 
     parameters.output_file_name = {'period name', '_velocity_across_mice.mat'}; 

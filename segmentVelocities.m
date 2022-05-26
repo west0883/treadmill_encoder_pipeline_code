@@ -23,7 +23,7 @@ function [] = segmentVelocities(parameters)
     parameters.input_data_variable= 'vel.corrected'; 
     
     % Establish input directory for behavior segments
-     parameters.dir_in_segment_base = [dir_exper 'behavior\segmented behavior periods\'];
+     parameters.dir_in_segment_base = [dir_exper 'behavior\encoder segmented behavior periods\'];
     
     % Input data name for behavior segments
      parameters.input_segment_name = {'behavior_periods_', 'stack number', '.mat'}; 
@@ -32,7 +32,7 @@ function [] = segmentVelocities(parameters)
      parameters.input_segment_variable = {'period name', '_periods_correct'}; 
   
     % Establish base output directory
-    parameters.dir_out_base=[dir_exper 'behavior\velocity segmented by behavior\'];
+    parameters.dir_out_base=[dir_exper 'behavior\encoder velocity segmented by behavior\'];
     
     % Output file name. 
     parameters.output_filename = {'segmented_velocities_', 'stack number', '.mat'}; 

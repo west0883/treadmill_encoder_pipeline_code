@@ -20,16 +20,16 @@ function [] = concatenateVelocities(parameters)
     parameters.concatDim = 2;
     
     % Establish input directory for velocity
-    parameters.dir_input_base = [dir_exper 'behavior\velocity segmented by behavior\'];
+    parameters.dir_input_base = [dir_exper 'behavior\encoder velocity segmented by behavior\'];
     
     % Input data name for velocity
-    parameters.input_file_name= {'segmented_velocities', 'stack number', '.mat'}; 
+    parameters.input_file_name= {'segmented_velocities_', 'stack number', '.mat'}; 
      
     % Get the input variable name ;
     parameters.input_variable_name = {'vel_', 'period name'}; 
   
     % Establish base output directory
-    parameters.dir_out_base=[dir_exper 'behavior\all behavior instances per mouse\'];
+    parameters.dir_out_base=[dir_exper 'behavior\encoder all behavior instances per mouse\'];
     
      % Output file name. 
     parameters.output_file_name = {'period name', '_all_velocities.mat'}; 
