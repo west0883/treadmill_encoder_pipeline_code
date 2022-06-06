@@ -33,7 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-%parameters.mice_all = parameters.mice_all();
+parameters.mice_all = parameters.mice_all(6);       %[1:6, 8]);
 %parameters.mice_all(1).days = parameters.mice_all(1).days(6:end);
 % parameters.mice_all(1).days(1).spontaneous = {'01', '02', '03', '04', '05'};
 
@@ -125,7 +125,7 @@ parameters.time_window_hz_continued = parameters.time_window_seconds_continued *
 % Do you want full transitions? (These are rare)
 % "true" if you want "full onsets" and "full offsets" calculated; false if
 % not.
-parameters.full_transition_flag = true;  
+parameters.full_transition_flag = false;  
 parameters.periods_full_transition={'full_onset';
                          'full_offset'}; 
 
@@ -252,6 +252,16 @@ parameters.loop_list.things_to_save.behavior_periods.level = 'stack';
 
 RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
 
+%% Delete the rest segment that was found in fluorescence analysis to be bad
+% Mouse 1107, day 012522, stack 6, rest, instance 163; 
+ load('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\behavior_periods_06.mat');
+ 
+ % The bad instance happend to be the last recorded instance, so the
+ % desired sized is 162.
+ if size(behavior_periods.rest, 1) > 162 
+     behavior_periods.rest(163, :) = [];
+     save('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\behavior_periods_06.mat', 'behavior_periods');
+ end
 %% Segment velocities.
 
 % Always clear loop list first. 
