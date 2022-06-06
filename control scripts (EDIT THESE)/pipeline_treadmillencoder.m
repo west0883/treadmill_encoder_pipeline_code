@@ -366,7 +366,7 @@ parameters.loop_list.things_to_save.average.level = 'period';
 
 RunAnalysis({@AverageData}, parameters);
 
-%% Average walk period velocity per instance.
+%% Average walk period velocity per instance. -- continued walk only
 % Is for regression analysis mostly, so save in regression analysis folder.
 % Use ReshapeData to flip the vectors, for concatenation later.
 period = {'walk'};
@@ -405,7 +405,7 @@ parameters.loop_list.things_to_rename = {{'data_reshaped', 'data'}};
 RunAnalysis({@ReshapeData, @AverageData, }, parameters);
 
 %% Plot the average walk velocity calculated above
-for mousei = 1:size(mice_all,2)
+for mousei = [1:6 8]%1:size(mice_all,2)
     mouse = mice_all(mousei).name;
     load([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\velocity_vector.mat']);
     figure; histogram(velocity_vector, 20);
@@ -413,3 +413,151 @@ for mousei = 1:size(mice_all,2)
     title(['spontaneous walk average velocity, ' mouse]);
     savefig([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\spontaneous_vevlocities.fig']);
 end
+
+%% Roll velocity 
+periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods'}, 'period_iterator';            
+               };
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+% Dimension to roll across (time dimension). Will automatically add new
+% data to the last + 1 dimension. 
+parameters.rollDim = 1; 
+
+% Window and step sizes (in frames)
+parameters.windowSize = 20;
+parameters.stepSize = 5; 
+
+% Input 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_velocity'}; 
+parameters.loop_list.things_to_load.data.level = 'period';
+
+% Output
+parameters.loop_list.things_to_save.data_rolled.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.data_rolled.filename= {'velocity_rolled.mat'};
+parameters.loop_list.things_to_save.data_rolled.variable= {'velocity_rolled{', 'period_iterator', ',1}'}; 
+parameters.loop_list.things_to_save.data_rolled.level = 'mouse';
+
+parameters.loop_list.things_to_save.roll_number.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.roll_number.filename= {'velocity_rolled_rollnumber.mat'};
+parameters.loop_list.things_to_save.roll_number.variable= {'roll_number{', 'period_iterator', ',1}'}; 
+parameters.loop_list.things_to_save.roll_number.level = 'mouse';
+
+RunAnalysis({@RollData}, parameters);
+
+
+
+%% Average rolled velocity per instance, all period types.
+periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods{:}'}, 'period_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+% Permute data so instances are in last dimension 
+parameters.DimOrder = [1, 3, 2];
+
+% Dimension to average across 
+parameters.averageDim  = 1; 
+
+% Load & put in the "true" roll number there's supposed to be.
+load([parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\1087\velocity_rolled_rollnumber.mat'], 'roll_number'); 
+parameters.roll_number = roll_number;
+clear roll_number;
+
+% Evaluation instructions (put instances in last dimension)
+parameters.evaluation_instructions = {{}; {};{'if size(parameters.data,1) ~= parameters.roll_number{', 'period_iterator', '};'...
+                                        'data_evaluated = transpose(parameters.data);'...
+                                        'else;'...
+                                         'data_evaluated = parameters.data;'...
+                                         'end'}};
+
+
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'velocity_rolled.mat'};
+parameters.loop_list.things_to_load.data.variable= {'velocity_rolled{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename= {'velocity_averaged_by_instance.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable= {'velocity_averaged_by_instance{', 'period_iterator',',1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+parameters.loop_list.things_to_rename = {{'data_permuted', 'data'}; 
+                                         { 'average', 'data'}};
+RunAnalysis({@PermuteData, @AverageData, @EvaluateOnData}, parameters);
+
+%% Calculate average acceleration per rolled instance.
+% permute, take diff, average, evaluate (the same as above, but with the
+% diff step too). Keep it as per roll, would be much more accurate than by
+% entire instance and still be pretty comparable to motorized.
+
+periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods{:}'}, 'period_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+% Permute data so instances are in last dimension 
+parameters.DimOrder = [1, 3, 2];
+
+% Dimension to average across 
+parameters.averageDim  = 1; 
+
+% Load & put in the "true" roll number there's supposed to be.
+load([parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\1087\velocity_rolled_rollnumber.mat'], 'roll_number'); 
+parameters.roll_number = roll_number;
+clear roll_number;
+
+% Evaluation instructions (put instances in last dimension)
+parameters.evaluation_instructions = {{}; 
+                                       {'data_evaluated = diff(parameters.data);'} ;
+                                        {};
+                                        {'if size(parameters.data,1) ~= parameters.roll_number{', 'period_iterator', '};'...
+                                        'data_evaluated = transpose(parameters.data);'...
+                                        'else;'...
+                                         'data_evaluated = parameters.data;'...
+                                         'end'}};
+
+
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'velocity_rolled.mat'};
+parameters.loop_list.things_to_load.data.variable= {'velocity_rolled{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\spontaneous\rolled concatenated velocity\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename= {'accel_averaged_by_instance.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable= {'accel_averaged_by_instance{', 'period_iterator',',1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+parameters.loop_list.things_to_rename = {{'data_permuted', 'data'}
+                                         {'data_evaluated', 'data'}; 
+                                         { 'average', 'data'}};
+RunAnalysis({@PermuteData, @EvaluateOnData, @AverageData, @EvaluateOnData}, parameters);
