@@ -148,13 +148,13 @@ parameters.putty_flag = true;
 % Iterations.
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
                'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
-               'log', { 'dir("Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\ArduinoOutput*.log").name'}, 'log_iterator'; 
+               'log', { 'dir("Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\m', 'mouse', '\Arduino Output\ArduinoOutput*.log").name'}, 'log_iterator'; 
                'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator'};
 
 parameters.loop_variables.mice_all = parameters.mice_all;
 
 % Input values
-parameters.loop_list.things_to_load.log.dir = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\'};
+parameters.loop_list.things_to_load.log.dir = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\m', 'mouse', '\Arduino Output\'};
 parameters.loop_list.things_to_load.log.filename= {'log'}; 
 parameters.loop_list.things_to_load.log.variable= {}; 
 parameters.loop_list.things_to_load.log.level = 'log';
