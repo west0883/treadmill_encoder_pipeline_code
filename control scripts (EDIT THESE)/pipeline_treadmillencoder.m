@@ -33,7 +33,7 @@ parameters.mice_all = mice_all;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-parameters.mice_all = parameters.mice_all(6);       %[1:6, 8]);
+%parameters.mice_all = parameters.mice_all(6);       %[1:6, 8]);
 %parameters.mice_all(1).days = parameters.mice_all(1).days(6:end);
 % parameters.mice_all(1).days(1).spontaneous = {'01', '02', '03', '04', '05'};
 
@@ -249,6 +249,11 @@ parameters.loop_list.things_to_save.behavior_periods.dir = {[parameters.dir_expe
 parameters.loop_list.things_to_save.behavior_periods.filename= {'behavior_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.behavior_periods.variable= {'behavior_periods'}; 
 parameters.loop_list.things_to_save.behavior_periods.level = 'stack';
+
+parameters.loop_list.things_to_save.duration_places.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.duration_places.filename= {'duration_places_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.duration_places.variable= {'duration_places'}; 
+parameters.loop_list.things_to_save.duration_places.level = 'stack';
 
 RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
 
