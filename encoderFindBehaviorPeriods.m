@@ -226,7 +226,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
         % Startwalk calculations
 
         % Find the walk period that begins at the same time the startwalk period does
-        ind1=find(walk_periods(:,1)==startwalk_unclean_periods(rowi,1)); 
+        ind1=find(walk_periods(:,1)==startwalk_unclean_periods(rowi,1) - 1); 
 
         % if the walk period doesn't extend far foward enough in time,
         % mark the instance for removal from both startwalk and prewalk
@@ -238,7 +238,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
         % If the walk period IS long enough
         else
             % Keep the startwalk, truncate the walk period so it doesn't include the startwalk
-            walk_periods(ind1,1)=startwalk_unclean_periods(rowi,2);    
+            walk_periods(ind1,1)=startwalk_unclean_periods(rowi,2) + 1;    
 
             % Can now check if the corresponding prewalk in this instance is usable
 
