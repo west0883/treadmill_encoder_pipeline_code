@@ -419,6 +419,51 @@ for mousei = [1:6 8]%1:size(mice_all,2)
     savefig([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\spontaneous_vevlocities.fig']);
 end
 
+%% Average spontatneous walk veclotiy across mice.
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterations. 
+% don't use mouse 1100 (#4)
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all([1:3 5:7] ).name'}, 'mouse_iterator'; 
+              };
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% both times
+parameters.averageDim = 1;
+parameters.average_and_std_together = false;
+
+%
+parameters.concatDim  = 1; 
+parameters.concatenation_level = 'mouse'; 
+
+% Input
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'velocity_vector.mat'};
+parameters.loop_list.things_to_load.data.variable= {'velocity_vector'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'behavior\spontaneous\average walk velocity\across mice\']};
+parameters.loop_list.things_to_save.average.filename= {'walk_velocity_acrossmice_average.mat'};
+parameters.loop_list.things_to_save.average.variable= {'velocity_average'}; 
+parameters.loop_list.things_to_save.average.level = 'end';
+
+parameters.loop_list.things_to_save.std_dev.dir = {[parameters.dir_exper 'behavior\spontaneous\average walk velocity\across mice\']};
+parameters.loop_list.things_to_save.std_dev.filename= {'walk_velocity_acrossmice_std.mat'};
+parameters.loop_list.things_to_save.std_dev.variable= {'velocity_std'}; 
+parameters.loop_list.things_to_save.std_dev.level = 'end';
+
+parameters.loop_list.things_to_rename = {{'average', 'data'};
+                                         {'concatenated_data', 'data'}};
+
+RunAnalysis({@AverageData, @ConcatenateData, @AverageData}, parameters );
+
+
 %% Roll velocity 
 periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
 
