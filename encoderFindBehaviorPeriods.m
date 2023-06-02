@@ -365,9 +365,11 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
             % then both the "long" and "brokendown" versions of rest/walk will be empty
             holding_long=[]; 
             brokendown=[];
+            duration_place = [];
         else    
            holding_long=periods_holding; % will save the not-divded versions of rest/walk 
            brokendown=[];
+           duration_place = [];
 
            % for each instance in a period
            for instancei=1:size(periods_holding,1) 
@@ -387,6 +389,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                   % concatenate the first chunk into list of brokendown
                   % chunks for the stack
                   brokendown=[brokendown; new_chunk_start, new_chunk_end]; 
+                  duration_place = [duration_place; 1];
 
                   % if the instance can create more than 1 3-second chunk
                   if quotient>1
@@ -400,6 +403,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
 
                           % concatenate the chunk into your list of 
                           brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
+                          duration_place = [duration_place; quotienti + 1];
                       end 
                   end
                else
@@ -407,13 +411,16 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                    %make only 1 chunk using the start and stop of the
                    %instancee
                    brokendown=[brokendown; periods_holding(instancei,:)];   
+                   duration_place = [duration_place; 1];
                end
            end
 
         end
-         % return to period-specific name
-          eval([period '_periods=brokendown;']);
-          eval([period '_long_periods=holding_long;']); 
+
+        % return to period-specific name
+        eval([period '_periods=brokendown;']);
+        eval([period '_long_periods=holding_long;']); 
+        eval([period '_duration_place = duration_place;'])
     end
 
 
@@ -490,6 +497,18 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     
          % return to period-specific name
          eval([period '_periods=periods_holding;']); 
+
+         % If this is rest or walk (continued periods), also remove
+         % corresponding duration place
+         if strcmp(period, 'rest') || strcmp(period, 'walk')
+             eval(['duration_place = ' period '_duration_place;']);
+             duration_place(rows_todelete, :) = [];
+             eval([period '_duration_place = duration_place;']); 
+
+             % also put into output structure
+             parameters.duration_places.(period) = duration_place;
+
+         end
      end
 
 
@@ -680,6 +699,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
          end
 
          % change generic name back to period name
-         eval(['parameters.behavior_periods.' period '=periods_correct;']);
+         parameters.behavior_periods.(period) = periods_correct;
+         
      end
 end
