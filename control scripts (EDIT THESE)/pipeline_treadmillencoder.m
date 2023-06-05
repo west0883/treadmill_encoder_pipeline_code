@@ -260,13 +260,16 @@ RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
 %% Delete the rest segment that was found in fluorescence analysis to be bad
 % Mouse 1107, day 012522, stack 6, rest, instance 163; 
  load('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\behavior_periods_06.mat');
- 
+  load('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\duration_places_06.mat');
  % The bad instance happend to be the last recorded instance, so the
  % desired sized is 162.
  if size(behavior_periods.rest, 1) > 162 
      behavior_periods.rest(163, :) = [];
+     duration_places.rest(163, :) = []; 
      save('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\behavior_periods_06.mat', 'behavior_periods');
+     save('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\duration_places_06.mat', 'duration_places');
  end
+ 
 %% Segment velocities.
 
 % Always clear loop list first. 
