@@ -289,7 +289,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
             % Postwalk calculations
 
             % Find the rest period that begins at the same time the postwalk period does
-            ind1=find(rest_periods(:,1)==postwalk_unclean_periods(rowi,1));
+            ind1=find(rest_periods(:,1)==postwalk_unclean_periods(rowi,1) - 1);
 
             % If the rest period doesn't extend far backward enough in time, mark the instance for removal
             if rest_periods(ind1,2)<postwalk_unclean_periods(rowi,2) 
@@ -298,7 +298,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
             % If the rest period IS long enough  
             else 
                 % Keep the postwalk, truncate the rest period so it doesn't include the postwalk
-                rest_periods(ind1,1)=postwalk_unclean_periods(rowi,2);
+                rest_periods(ind1,1)=postwalk_unclean_periods(rowi,2) + 1;
             end 
         end
     end 
