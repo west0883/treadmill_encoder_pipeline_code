@@ -219,6 +219,8 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
    % Set up variable to hold rows (instances) for removal
    startwalk_rows_todelete=[]; 
    prewalk_rows_todelete=[]; 
+   walk_rows_todelete = []; 
+   rest_rows_todelete = [];
 
    % For each rest-to-walk transition
    for rowi=1:size(rest_to_walk,1) 
@@ -229,11 +231,13 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
         ind1=find(walk_periods(:,1)==startwalk_unclean_periods(rowi,1) - 1); 
 
         % if the walk period doesn't extend far foward enough in time,
-        % mark the instance for removal from both startwalk and prewalk
+        % mark the instance for removal from both startwalk and prewalk &
+        % that walk
         if walk_periods(ind1,2)<startwalk_unclean_periods(rowi,2) 
 
             startwalk_rows_todelete=[startwalk_rows_todelete; rowi];
             prewalk_rows_todelete=[prewalk_rows_todelete; rowi];
+            walk_rows_todelete = [walk_rows_todelete; ind1];
 
         % If the walk period IS long enough
         else
@@ -250,6 +254,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
             % If the rest period doesn't extend far back enough in time, mark the instance for removal 
             if rest_periods(ind1,1)>prewalk_unclean_periods(rowi,1)
                 prewalk_rows_todelete=[prewalk_rows_todelete; rowi];
+                rest_rows_todelete = [rest_rows_todelete; ind1];
 
             % If the rest period IS long enough
             else  
@@ -278,10 +283,11 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
 
             stopwalk_rows_todelete=[stopwalk_rows_todelete; rowi];
             postwalk_rows_todelete=[postwalk_rows_todelete; rowi];
-
+            walk_rows_todelete = [walk_rows_todelete; ind1];
+        
         % If the walk period IS long enough
         else 
-            % Keep the stopwalk, truncate the rest period so it doesn't include the stopwalk
+            % Keep the stopwalk, truncate the walk period so it doesn't include the stopwalk
             walk_periods(ind1,2)=stopwalk_unclean_periods(rowi,1);  
 
             % Can now check if the corresponding postwalk in this instance is usable
@@ -294,6 +300,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
             % If the rest period doesn't extend far backward enough in time, mark the instance for removal
             if rest_periods(ind1,2)<postwalk_unclean_periods(rowi,2) 
                 postwalk_rows_todelete=[postwalk_rows_todelete; rowi];
+                rest_rows_todelete = [rest_rows_todelete; ind1];
 
             % If the rest period IS long enough  
             else 
@@ -303,7 +310,8 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
         end
     end 
 
-% Remove "unclean" periods found above. 
+    % Remove "unclean" periods found above. 
+
     for periodi=1:size(periods_transition,1)
         period=periods_transition{periodi};
         
@@ -323,6 +331,27 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
         % Return variables to a period-specific name
         eval([period '_periods=periods_holding;']);
     end
+
+    for periodi=1:size(periods_long,1)
+        period=periods_long{periodi};
+        
+        % Switch to generic names
+        eval(['periods_holding=' period '_periods;']);  
+        eval(['rows_todelete=' period '_rows_todelete;']); 
+        
+        % Don't let period ranges fall above length of vel or below index 1
+        [rows1, ~]=find(periods_holding>size(vel,1)); 
+        [rows2, ~]=find(periods_holding<1); 
+        
+        rows_todelete=[rows_todelete; rows1; rows2];
+        
+        % remove the "unclean" intances
+        periods_holding(rows_todelete,:)=[];  
+        
+        % Return variables to a period-specific name
+        eval([period '_periods=periods_holding;']);
+    end
+
 
  %% find clean instances of walk, rest (at least 3 seconds)  
  % Now that you've removed the transition periods, find instances of rest 
