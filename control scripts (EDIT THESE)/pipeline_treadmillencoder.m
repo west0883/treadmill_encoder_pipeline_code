@@ -239,6 +239,8 @@ parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 
 
 parameters.loop_variables.mice_all = parameters.mice_all;
 
+parameters.full_transition_flag = true;
+
 % Input.
 parameters.loop_list.things_to_load.velocity.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_load.velocity.filename= {'velocity_', 'stack', '.mat'};
@@ -269,7 +271,7 @@ RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
      save('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\behavior_periods_06.mat', 'behavior_periods');
      save('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\spontaneous\segmented behavior periods\1107\012522\duration_places_06.mat', 'duration_places');
  end
- 
+
 %% Segment velocities.
 
 % Always clear loop list first. 
