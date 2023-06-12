@@ -20,6 +20,8 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
     periods_long = parameters.periods_long;   
     periods_transition = parameters.periods_transition;
     periods_long_searchorder = parameters.periods_long_searchorder;
+
+    duration_place_maximum_default = parameters.duration_place_maximum_default;
     
     time_window_frames = parameters.time_window_frames;
     time_window_frames_continued = parameters.time_window_frames_continued;
@@ -402,6 +404,9 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
 
            % for each instance in a period
            for instancei=1:size(periods_holding,1) 
+
+               duration_place_number = 1;
+
                % find the length of the instance
                period_length=periods_holding(instancei,2)-periods_holding(instancei,1)+1;
                if period_length > time_window_frames_continued   % if the walk chunk is greater than 3 seconds 
@@ -422,6 +427,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
 
                   % if the instance can create more than 1 3-second chunk
                   if quotient>1
+                   
                       for quotienti=1:(quotient-1) % don't use the last one because you're cycling through the *start* of each chunk
 
                           % find the start of the given chunk
@@ -433,6 +439,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                           % concatenate the chunk into your list of 
                           brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
                           duration_place = [duration_place; quotienti + 1];
+                          duration_place_number = duration_place_number + 1; 
                       end 
                   end
                else
@@ -441,6 +448,16 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
                    %instancee
                    brokendown=[brokendown; periods_holding(instancei,:)];   
                    duration_place = [duration_place; 1];
+               end
+
+               % If the continued period starts at the beginning of the stack
+               % (extends before it), make all the duration places of this
+               % instance (with duration_place_number) into a default
+               % maximum number.
+               if instancei == 1 && periods_holding(instancei, 1) == 1
+
+                   duration_place(end - duration_place_number + 1 : end) = duration_place_maximum_default;
+                 
                end
            end
 
