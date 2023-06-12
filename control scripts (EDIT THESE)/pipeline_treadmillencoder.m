@@ -240,6 +240,7 @@ parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 
 parameters.loop_variables.mice_all = parameters.mice_all;
 
 parameters.full_transition_flag = true;
+parameters.duration_place_maximum_default = 25; 
 
 % Input.
 parameters.loop_list.things_to_load.velocity.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
