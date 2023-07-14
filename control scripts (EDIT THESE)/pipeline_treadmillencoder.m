@@ -134,6 +134,11 @@ parameters.full_transition_extra_time=1;
 parameters.full_transition_extra_frames=parameters.full_transition_extra_time*parameters.fps;                                          
 
 periods = [parameters.periods_long; parameters.periods_transition; parameters.periods_full_transition];
+
+
+parameters.loop_variables.periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % spontaneous continued periods 
+parameters.loop_variables.mice_all = parameters.mice_all;
+
 %% Extract data and save as .mat file.  (Can take awhile).
 % From .log if PUTTY was used, from .txt files if it wasn't. 
 
@@ -242,12 +247,13 @@ parameters.loop_variables.mice_all = parameters.mice_all;
 parameters.full_transition_flag = true;
 parameters.duration_place_maximum_default = 25; 
 
-% Input.
+% Inputs
 parameters.loop_list.things_to_load.velocity.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity trace per stack\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_load.velocity.filename= {'velocity_', 'stack', '.mat'};
 parameters.loop_list.things_to_load.velocity.variable= {'velocity'}; 
 parameters.loop_list.things_to_load.velocity.level = 'stack';
 
+% Outputs
 parameters.loop_list.things_to_save.behavior_periods.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.behavior_periods.filename= {'behavior_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.behavior_periods.variable= {'behavior_periods'}; 
