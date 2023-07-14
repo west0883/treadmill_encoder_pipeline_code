@@ -329,6 +329,47 @@ parameters.loop_list.things_to_save.segmented_timeseries.level = 'stack';
 
 RunAnalysis({@SegmentTimeseriesData}, parameters); 
 
+
+%% Check velocity sizes 
+%Look for stacks when number of instances don't match those of fluorescence.
+% Don't need to load, so don't use RunAnalysis.
+
+parameters.loop_variables.periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % spontaneous continued periods 
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+parameters.loop_list.iterators = {
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator';
+               'period', {'loop_variables.periods{1:6}'}, 'period_iterator';
+               };
+
+% If using a sub-structure, need to use regular loading
+parameters.use_substructure = true; 
+
+parameters.checkingDim = 2;
+parameters.check_againstDim = 3;
+
+% Input values
+parameters.loop_list.things_to_check.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity segmented by behavior\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_check.filename= {'segmented_velocity_', 'stack', '.mat'};
+parameters.loop_list.things_to_check.variable= {'segmented_velocity.', 'period'}; 
+parameters.loop_list.things_to_check.level = 'stack';
+
+parameters.loop_list.check_against.dir = {[parameters.dir_exper 'fluorescence analysis\segmented timeseries\spontaneous\'],  'mouse', '\', 'day', '\'};
+parameters.loop_list.check_against.filename= {'segmented_timeseries_', 'stack', '.mat'};  
+parameters.loop_list.check_against.variable = {'segmented_timeseries(', 'period_iterator', ')'};
+
+% Output
+parameters.loop_list.mismatched_data.dir = {[parameters.dir_exper 'behavior\spontaneous\']};
+parameters.loop_list.mismatched_data.filename= {'mismatched_data.mat'};
+
+CheckSizes2(parameters);
+
+%% Remove mismatched instances
+
+
+
 %% Concatenate velocities per behavior period per mouse. 
 
 % Always clear loop list first. 
@@ -434,7 +475,7 @@ parameters.loop_list.things_to_rename = {{'data_reshaped', 'data'}};
 RunAnalysis({@ReshapeData, @AverageData, }, parameters);
 
 %% Plot the average walk velocity calculated above
-for mousei = [1:6 8]%1:size(mice_all,2)
+for mousei = [1:7]%1:size(mice_all,2)
     mouse = mice_all(mousei).name;
     load([parameters.dir_exper 'regression analysis\walk velocity\velocity vectors\spontaneous\', mouse, '\velocity_vector.mat']);
     figure; histogram(velocity_vector, 20);
