@@ -264,6 +264,11 @@ parameters.loop_list.things_to_save.duration_places.filename= {'duration_places_
 parameters.loop_list.things_to_save.duration_places.variable= {'duration_places'}; 
 parameters.loop_list.things_to_save.duration_places.level = 'stack';
 
+parameters.loop_list.things_to_save.long_periods.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.long_periods.filename= {'long_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.long_periods.variable= {'long_periods'}; 
+parameters.loop_list.things_to_save.long_periods.level = 'stack';
+
 RunAnalysis({@encoderFindBehaviorPeriods}, parameters);
 
 %% Delete the rest segment that was found in fluorescence analysis to be bad
