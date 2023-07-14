@@ -689,8 +689,7 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
        end 
    end
 
-    %% Convert the time periods to frames, then correct any problems
-    % from the conversion.
+    %% Some final checks & put into output structure
 
     % ***Make one big list of periods to cycle through***
 
@@ -748,4 +747,8 @@ function [parameters] = encoderFindBehaviorPeriods(parameters)
          parameters.behavior_periods.(period) = periods_correct;
          
      end
+
+     parameters.long_periods.walk = walk_long_periods;
+     parameters.long_periods.rest = rest_long_periods; 
+
 end
