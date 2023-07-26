@@ -676,3 +676,76 @@ parameters.loop_list.things_to_rename = {{'data_permuted', 'data'}
                                          {'data_evaluated', 'data'}; 
                                          { 'average', 'data'}};
 RunAnalysis({@PermuteData, @EvaluateOnData, @AverageData, @EvaluateOnData}, parameters);
+
+%% Velocity for fluorescence PLSR
+% Instead of rolling velocity, reshape so each time point is its own instance
+% (Is for fluorescence PLSR)
+
+% Put into same cell array, to match other formatting
+
+periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods'}, 'period_iterator';            
+               };
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+% one column, timepoints of each instance are together 
+parameters.evaluation_instructions = {{'data_evaluated = transpose(reshape(parameters.data, [], 1));'}};
+% Input 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_velocity'}; 
+parameters.loop_list.things_to_load.data.level = 'period';
+
+% Output
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\spontaneous\velocity for fluorescence PLSR\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename= {'velocity_forFluorescence.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable= {'velocity_forFluorescence{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+RunAnalysis({@EvaluateOnData}, parameters);
+
+%% Acceleration for fluorescence PLSR
+periods = {'rest', 'walk', 'prewalk', 'startwalk', 'stopwalk', 'postwalk'}; % not full onset/offset
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'period', {'loop_variables.periods'}, 'period_iterator';            
+               };
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.loop_variables.periods = periods;
+
+% one column, timepoints of each instance are together 
+parameters.evaluation_instructions = {{'holder1 = diff(parameters.data);'... % take difference across rows (inside same instance)
+                                       'holder2 = [NaN(1, size(holder1, 2)); holder1];'... % add row of NaNs to top
+                                       'data_evaluated = transpose(reshape(holder2, [], 1));'
+                                        }};
+
+% Input 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\spontaneous\concatenated velocity by behavior\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_velocity_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_velocity'}; 
+parameters.loop_list.things_to_load.data.level = 'period';
+
+% Output
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\spontaneous\acceleration for fluorescence PLSR\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename= {'accel_forFluorescence.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable= {'accel_forFluorescence{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+RunAnalysis({@EvaluateOnData}, parameters);
